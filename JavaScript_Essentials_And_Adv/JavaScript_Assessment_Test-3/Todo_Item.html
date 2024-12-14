@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List with Cookies</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 300px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        input {
+            width: 200px;
+            padding: 5px;
+            margin-right: 5px;
+        }
+        button {
+            background-color: #f5a623;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            background-color: #f4f6f8;
+            border-radius: 5px;
+        }
+        li {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Todo List</h2>
+        <input type="text" id="todoInput" placeholder="add new">
+        <button id="addBtn">Add</button>
+        <ul id="todoList"></ul>
+    </div>
+
+    <script>
+        // Select DOM elements
+        const inputField = document.getElementById('todoInput');
+        const addButton = document.getElementById('addBtn');
+        const todoList = document.getElementById('todoList');
+
+        //load todos from cookies when the page loads
+        function loadTodos() {
+            const savedTodos = getCookie('todos'); 
+            if (savedTodos) {
+                const todoArray = JSON.parse(savedTodos); 
+                todoArray.forEach(todo => addTodoToDOM(todo));
+            }
+        }
+
+        // save todos to cookies
+        function saveTodosToCookies() {
+            const todoItems = document.querySelectorAll('#todoList li');
+            const todoArray = Array.from(todoItems).map(item => item.textContent);
+            setCookie('todos', JSON.stringify(todoArray), 7); 
+        }
+
+        // add a new todo to the DOM
+        function addTodoToDOM(todoText) {
+            const newItem = document.createElement('li'); 
+            newItem.textContent = todoText; 
+            todoList.appendChild(newItem); 
+        }
+
+        // Event listener for the Add button
+        addButton.addEventListener('click', () => {
+            const newTodo = inputField.value.trim(); 
+            if (newTodo) {
+                addTodoToDOM(newTodo); 
+                inputField.value = ''; 
+                saveTodosToCookies(); 
+            }
+        });
+
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        // Function to get a cookie by name
+        function getCookie(name) {
+            const cname = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+            for (let i = 0; i < cookieArray.length; i++) {
+                let c = cookieArray[i].trim();
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        // Load saved todos when the page is loaded
+        window.onload = loadTodos;
+    </script>
+</body>
+</html>
